@@ -1,4 +1,4 @@
-package com.dc.webmagic;
+package com.dc.spider;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -8,10 +8,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @EnableScheduling
 @SpringBootApplication
-public class WebmagicApplication {
+public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(WebmagicApplication.class, args);
+		SpringApplication.run(Application.class, args);
 	}
 
 }
