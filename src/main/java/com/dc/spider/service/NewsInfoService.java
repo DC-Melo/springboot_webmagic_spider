@@ -9,6 +9,9 @@ public interface NewsInfoService {
     //保存工作信息
     public void save(NewsInfo newsInfo);
 
+    //保存工作信息
+    public void saveList(List<NewsInfo> newsInfoList);
+
 
     //根据条件查询工作信息
     public List<NewsInfo> findNewsInfo(NewsInfo newsInfo);

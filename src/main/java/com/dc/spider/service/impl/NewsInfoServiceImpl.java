@@ -24,7 +24,8 @@ public class NewsInfoServiceImpl implements NewsInfoService {
         //根据url和发布时间查询数据
         NewsInfo param=new NewsInfo();
         param.setUrl(newsInfo.getUrl());
-        param.setTime(newsInfo.getTime());
+        // param.setTime(newsInfo.getTime());
+        // param.setTime(newsInfo.getTime());
 
         //执行查询
         List<NewsInfo> list=this.findNewsInfo(param);
@@ -32,6 +33,15 @@ public class NewsInfoServiceImpl implements NewsInfoService {
         //判断查询结果是否为空
         if(list.size()==0){
             this.newsInfoDao.saveAndFlush(newsInfo);
+        }
+
+    }
+
+    @Override
+    public void saveList(List<NewsInfo> newsInfoList) {
+        //根据url和发布时间查询数据
+        for(int i=0;i<newsInfoList.size();i++){
+                this.save(newsInfoList.get(i));
         }
 
     }

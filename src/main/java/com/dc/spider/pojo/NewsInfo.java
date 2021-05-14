@@ -11,16 +11,15 @@ public class NewsInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String companyName;
-    private String companyAddr;
-    private String companyInfo;
-    private String newsName;
-    private String newsAddr;
-    private String newsInfo;
-    private Integer salaryMin;
-    private Integer salaryMax;
     private String url;
-    private String time;
+    private String title;
+    private String subtitle;
+    private String author;
+    private String summary;
+    private String keywords;
+    private String content;
+    private String publishTime;
+    private String publisher;
 
     public Long getId() {
         return id;
@@ -28,70 +27,6 @@ public class NewsInfo {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public String getCompanyAddr() {
-        return companyAddr;
-    }
-
-    public void setCompanyAddr(String companyAddr) {
-        this.companyAddr = companyAddr;
-    }
-
-    public String getCompanyInfo() {
-        return companyInfo;
-    }
-
-    public void setCompanyInfo(String companyInfo) {
-        this.companyInfo = companyInfo;
-    }
-
-    public String getNewsName() {
-        return newsName;
-    }
-
-    public void setNewsName(String newsName) {
-        this.newsName = newsName;
-    }
-
-    public String getNewsAddr() {
-        return newsAddr;
-    }
-
-    public void setNewsAddr(String newsAddr) {
-        this.newsAddr = newsAddr;
-    }
-
-    public String getNewsInfo() {
-        return newsInfo;
-    }
-
-    public void setNewsInfo(String newsInfo) {
-        this.newsInfo = newsInfo;
-    }
-
-    public Integer getSalaryMin() {
-        return salaryMin;
-    }
-
-    public void setSalaryMin(Integer salaryMin) {
-        this.salaryMin = salaryMin;
-    }
-
-    public Integer getSalaryMax() {
-        return salaryMax;
-    }
-
-    public void setSalaryMax(Integer salaryMax) {
-        this.salaryMax = salaryMax;
     }
 
     public String getUrl() {
@@ -102,28 +37,84 @@ public class NewsInfo {
         this.url = url;
     }
 
-    public String getTime() {
-        return time;
+    public String getTitle() {
+        return title;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getSubtitle() {
+        return subtitle;
+    }
+
+    public void setSubtitle(String subtitle) {
+        this.subtitle = subtitle;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public String getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(String keywords) {
+        this.keywords = keywords;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getPublishTime() {
+        return publishTime;
+    }
+
+    public void setPublishTime(String publishTime) {
+        this.publishTime = publishTime;
+    }
+
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
     }
 
     @Override
     public String toString() {
         return "NewsInfo{" +
-                "id=" + id +
-                ", companyName='" + companyName + '\'' +
-                ", companyAddr='" + companyAddr + '\'' +
-                ", companyInfo='" + companyInfo + '\'' +
-                ", newsName='" + newsName + '\'' +
-                ", newsAddr='" + newsAddr + '\'' +
-                ", newsInfo='" + newsInfo + '\'' +
-                ", salaryMin=" + salaryMin +
-                ", salaryMax=" + salaryMax +
-                ", url='" + url + '\'' +
-                ", time='" + time + '\'' +
-                '}';
+            "id = " + getId() +
+            ", url = " + getUrl() +
+            ", title = " + getTitle() +
+            ", subtitle = " + getSubtitle() +
+            ", author = " + getAuthor() +
+            ", summary = " + getSummary() +
+            ", keywords = " + getKeywords() +
+            ", content = " + getContent() +
+            ", publishTime = " + getPublishTime() +
+            ", publisher = " + getPublisher() +
+            "}";
     }
+
 }
