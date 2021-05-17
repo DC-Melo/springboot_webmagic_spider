@@ -3,10 +3,15 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+
+import javax.swing.text.Document;
+
+import javax.xml.bind.Element;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,12 +26,9 @@ import org.springframework.stereotype.Component;
 import us.codecraft.webmagic.Page;
 import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Spider;
-import us.codecraft.webmagic.pipeline.FilePipeline;
 import us.codecraft.webmagic.processor.PageProcessor;
 import us.codecraft.webmagic.scheduler.QueueScheduler;
 
-import us.codecraft.webmagic.pipeline.FilePageModelPipeline;
-import us.codecraft.webmagic.pipeline.JsonFilePipeline;
 import us.codecraft.webmagic.scheduler.BloomFilterDuplicateRemover;
 
 import com.dc.spider.pojo.NewsInfo;
@@ -94,13 +96,19 @@ public class NewsProcessor implements PageProcessor {
         log.info("百度列表解析：");
         ArrayList<NewsInfo> newsInfoList = new ArrayList<NewsInfo>();
         Elements titles = page.getHtml().getDocument().select("h3");     //获得非百度百科块
+        Elements publishers = page.getHtml().getDocument().getElementsByClass("c-color-gray c-font-normal c-gap-right");
+        Elements contents = page.getHtml().getDocument().getElementsByClass("c-font-normal c-color-text");
+        Elements times = page.getHtml().getDocument().getElementsByClass("c-color-gray2 c-font-normal");
         for (int i = 0;i < titles.size();i++){
+            NewsInfo newsInfo=new NewsInfo();
             log.info(titles.get(i).select("a").attr("href"));
             log.info(titles.get(i).text());
-            NewsInfo newsInfo=new NewsInfo();
+            log.info(contents.get(i).text());
             newsInfo.setUrl(titles.get(i).select("a").attr("href"));
             newsInfo.setTitle(titles.get(i).text());
-            newsInfo.setContent(titles.get(i).text());
+            newsInfo.setPublisher(publishers.get(i).text());
+            newsInfo.setContent(contents.get(i).text());
+            newsInfo.setPublishTime(times.get(i).text());
             newsInfoList.add(newsInfo);
         }
         page.putField("newsInfoList",newsInfoList);
@@ -162,7 +170,8 @@ public class NewsProcessor implements PageProcessor {
     public void process(){
         log.info("新一轮抓取");
         Spider.create(new NewsProcessor())
-                .addUrl("https://www.baidu.com/s?rtt=1&bsst=1&cl=2&tn=news&ie=utf-8&word=%E6%AF%94%E7%89%B9%E5%B8%81")
+                .addUrl("https://www.baidu.com/s?rtt=1&bsst=1&cl=2&tn=news&ie=utf-8&word=%E6%AF%94%E7%89%B9%E5%B8%81+%E6%9A%B4%E8%B7%8C") //比特币暴跌
+                .addUrl("https://www.baidu.com/s?rtt=1&bsst=1&cl=2&tn=news&ie=utf-8&word=%E6%AF%94%E7%89%B9%E5%B8%81+%E6%9A%B4%E6%B6%A8") //比特币暴涨
                 .addUrl("http://www.pbc.gov.cn/goutongjiaoliu/113456/113469/11040/index1.html")
                 .setScheduler(new QueueScheduler().setDuplicateRemover(new BloomFilterDuplicateRemover(100000)))
                 .thread(10)

@@ -1,15 +1,21 @@
 package com.dc.spider.service.impl;
 
-import com.dc.spider.dao.NewsInfoDao;
-import com.dc.spider.pojo.NewsInfo;
-import com.dc.spider.service.NewsInfoService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.data.domain.Example;
+
 import org.springframework.stereotype.Service;
+
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.dc.spider.dao.NewsInfoDao;
+import com.dc.spider.pojo.NewsInfo;
+import com.dc.spider.sendhttp.SendHttps;
+import com.dc.spider.service.NewsInfoService;
 
 @Service
 public class NewsInfoServiceImpl implements NewsInfoService {
@@ -33,7 +39,11 @@ public class NewsInfoServiceImpl implements NewsInfoService {
         //判断查询结果是否为空
         if(list.size()==0){
             this.newsInfoDao.saveAndFlush(newsInfo);
+            if(!newsInfo.getPublishTime().contains("天")){
+                this.sendDingDing(newsInfo);
+            }
         }
+                // this.sendDingDing(newsInfo);
 
     }
 
@@ -54,5 +64,22 @@ public class NewsInfoServiceImpl implements NewsInfoService {
         List list=this.newsInfoDao.findAll(example);
 
         return list;
+    }
+    @Override
+    public void sendDingDing(NewsInfo newsInfo){
+        // 钉钉的webhook
+        String dingDingToken="https://oapi.dingtalk.com/robot/send?access_token=960c7be25215fa627e3d46da06bbde223c36e3b43c7a706b29ca249675d0695e";
+        // 请求的JSON数据，这里我用map在工具类里转成json格式
+        Map<String,Object> json=new HashMap();
+        json.put("msgtype","text");
+        Map<String,Object> text=new HashMap();
+        text.put("content","[dc]"+newsInfo.getTitle()+"\n"+newsInfo.getPublishTime()+"\n"+newsInfo.getContent()+"\n"+newsInfo.getUrl());
+        json.put("text",text);
+        // 发送post请求
+        String response = SendHttps.sendPostByMap(dingDingToken, json);
+    }
+    @Override
+    public void sendEmail(NewsInfo newsInfo){
+
     }
 }
