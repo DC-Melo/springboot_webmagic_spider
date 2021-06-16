@@ -29,10 +29,11 @@ public class SpringDataPipeline  implements Pipeline {
         //    this.newsInfoService.save(newsInfo);
         // }
         List<NewsInfo> newsInfoList = resultItems.get("newsInfoList");
+        String newsType = resultItems.get("newsType");
 
         if (newsInfoList != null) {
             //如果不为空把数据保存到数据库中
-            this.newsInfoService.saveList(newsInfoList);
+            this.newsInfoService.saveList(newsInfoList,newsType);
         }
     }
 }

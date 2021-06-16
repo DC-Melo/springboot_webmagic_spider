@@ -1,9 +1,16 @@
 package com.dc.spider.task;
+import java.io.BufferedReader;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.script.Invocable;
@@ -21,6 +28,9 @@ import org.jsoup.select.Elements;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -35,9 +45,10 @@ import us.codecraft.webmagic.scheduler.BloomFilterDuplicateRemover;
 import com.dc.spider.pojo.NewsInfo;
 
 @Component
-public class NewsProcessor implements PageProcessor {
-    private static final Log log = LogFactory.getLog(NewsProcessor.class);
-
+public class DaysNewsProcessor implements PageProcessor {
+    public static List<String> wordslist =new ArrayList<String>();
+    public static int wordsindex=0;
+    private static final Log log = LogFactory.getLog(DaysNewsProcessor.class);
 
     @Override
     public void process(Page page) {
@@ -46,7 +57,7 @@ public class NewsProcessor implements PageProcessor {
         try {
             Date date = new Date();	//创建一个date对象
             DateFormat format=new SimpleDateFormat("yyyyMMdd_HHMMSS"); //定义格式
-            String name="按照秒搜索"+format.format(date)+".html";
+            String name="按天搜索"+format.format(date)+".html";
             FileOutputStream fos = new FileOutputStream("web/"+name,false);
             //true表示在文件末尾追加
             fos.write(page.getHtml().toString().getBytes());
@@ -58,6 +69,17 @@ public class NewsProcessor implements PageProcessor {
         if (page.getUrl().toString().contains("www.baidu.com")){
             log.info("百度新闻列表:"+page.getUrl().toString());
             this.saveItemNewsInfo(page);
+            // if (wordslist.size() != 0){
+            //     try {
+            //         URI uri = new URI("http","www.baidu.com","/s","rtt=1&bsst=1&cl=2&tn=news&ie=utf-8&word="+wordslist.remove(0),null);
+            //         log.info(uri);
+            //         URL url = new URL(uri.toASCIIString());
+            //         log.info(url);
+            //         page.addTargetRequest(url.toString());
+            //     } catch(Exception e){
+            //         e.printStackTrace();
+            //     }
+            // }
         }else{
             log.info("新闻:"+page.getUrl().toString());
             this.saveNewsInfo(page);
@@ -75,7 +97,7 @@ public class NewsProcessor implements PageProcessor {
             NewsInfo newsInfo=new NewsInfo();
             log.info(titles.get(i).select("a").attr("href"));
             log.info(titles.get(i).text());
-            log.info(contents.get(i).text());
+            // log.info(contents.get(i).text());
             newsInfo.setUrl(titles.get(i).select("a").attr("href"));
             newsInfo.setTitle(titles.get(i).text());
             newsInfo.setSummary(contents.get(i).text());
@@ -89,7 +111,7 @@ public class NewsProcessor implements PageProcessor {
             newsInfoList.add(newsInfo);
         }
         page.putField("newsInfoList",newsInfoList);
-        page.putField("newsType","news");
+        page.putField("newsType","infomation");
     }
     private void saveNewsInfo(Page page) {
         //创建招聘详情对象
@@ -106,7 +128,7 @@ public class NewsProcessor implements PageProcessor {
         //把结果保存起来
         newsInfoList.add(newsInfo);
         page.putField("newsInfoList",newsInfoList);
-        page.putField("newsType","news");
+        page.putField("newsType","infomation");
     }
 
     private Site site=Site.me()
@@ -127,17 +149,52 @@ public class NewsProcessor implements PageProcessor {
     @Autowired
     private SpringDataPipeline springDataPipeline;
 
+    @Autowired
+    ResourceLoader resourceLoader;
 
     //initialDelay当任务启动后，等多久执行方法
-    @Scheduled(initialDelay = 1000,fixedDelay = 20*1000)
+    // @Scheduled(cron = "0 */10 * * * ?")
+    // @Scheduled(cron = "0 53 15 * * ?")
+    // @Scheduled(initialDelay = 1000,fixedDelay = 3600*1000)
+    @Scheduled(initialDelay = 1000,fixedDelay = 3600*1000)
     public void process(){
-        log.info("新一轮按秒抓取");
-        Spider.create(new NewsProcessor())
-                .addUrl("https://www.baidu.com/s?rtt=1&bsst=1&cl=2&tn=news&ie=utf-8&word=%E6%AF%94%E7%89%B9%E5%B8%81+%E6%9A%B4%E6%B6%A8") //比特币暴涨
-                .addUrl("https://www.baidu.com/s?rtt=1&bsst=1&cl=2&tn=news&ie=utf-8&word=%E6%AF%94%E7%89%B9%E5%B8%81+%E6%9A%B4%E8%B7%8C") //比特币暴跌
-                .setScheduler(new QueueScheduler().setDuplicateRemover(new BloomFilterDuplicateRemover(100000)))
-                .thread(10)
-                .addPipeline(this.springDataPipeline)
-                .run();
+        log.info("新一轮按天抓取");
+        try{
+            Resource resource = resourceLoader.getResource("classpath:resource.properties");
+            InputStream is = resource.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+            String data = null;
+            while((data = br.readLine()) != null) {
+                wordslist.add(data);
+                log.info("读取搜索字符:"+data);
+            }
+            br.close();
+            isr.close();
+            is.close();
+        }catch(Exception ex){
+            log.info("读取搜索字符资源错误");
+            log.info(ex);
+        }
+        // String itemUrl="https://www.baidu.com/s?rtt=1&bsst=1&cl=2&tn=news&ie=utf-8&word=%E5%8F%97+%E6%8A%95%E8%B5%84";
+        if (wordslist.size() > 0 ){
+            try {
+                wordsindex=(wordsindex%wordslist.size());
+                URI uri = new URI("http","www.baidu.com","/s","rtt=1&bsst=1&cl=2&tn=news&ie=utf-8&word="+wordslist.get(wordsindex),null);
+                wordsindex++;
+                URL url = new URL(uri.toASCIIString());
+                log.info(uri);
+                log.info(url);
+                Spider.create(new DaysNewsProcessor())
+                    .addUrl(url.toString()) 
+                    .setScheduler(new QueueScheduler().setDuplicateRemover(new BloomFilterDuplicateRemover(100000)))
+                    .thread(10)
+                    .addPipeline(this.springDataPipeline)
+                    .run();
+            } catch(Exception e){
+                e.printStackTrace();
+            }
+        }
     }
+
 }
