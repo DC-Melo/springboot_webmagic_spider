@@ -3,3 +3,4 @@
  */
 
 rootProject.name = 'spider'
+include('spring-boot_webmagic_spider')
